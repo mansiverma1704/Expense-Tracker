@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Expense Tracker</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f4f9;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 50px auto;
+      padding: 20px;
+      background: #fff;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
+    }
+
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .form-control {
+      margin-bottom: 15px;
+    }
+
+    label {
+      font-weight: bold;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    button {
+      background-color: #28a745;
+      color: white;
+      border: none;
+      padding: 10px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #218838;
+    }
+
+    .balance {
+      margin: 20px 0;
+      text-align: center;
+      font-size: 20px;
+      font-weight: bold;
+    }
+
+    .transaction-history {
+      margin-top: 20px;
+    }
+
+    .transaction {
+      display: flex;
+      justify-content: space-between;
+      background: #f9f9f9;
+      padding: 10px;
+      margin-bottom: 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+    }
+
+    .transaction button {
+      background-color: #dc3545;
+      border: none;
+      color: white;
+      padding: 5px 10px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .transaction button:hover {
+      background-color: #c82333;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Expense Tracker</h1>
+
+    <form id="transaction-form">
+      <div class="form-control">
+        <label for="amount">Amount</label>
+        <input type="number" id="amount" placeholder="Enter amount" required>
+      </div>
+
+      <div class="form-control">
+        <label for="description">Description</label>
+        <input type="text" id="description" placeholder="Enter description" required>
+      </div>
+
+      <div class="form-control">
+        <label for="category">Category</label>
+        <select id="category" required>
+          <option value="income">Income</option>
+          <option value="expense">Expense</option>
+        </select>
+      </div>
+
+      <button type="submit">Add Transaction</button>
+    </form>
+
+    <div class="balance">
+      Total Balance: $<span id="balance">0</span>
+    </div>
+
+    <div class="transaction-history">
+      <h2>Transaction History</h2>
+      <div id="transactions"></div>
+    </div>
+  </div>
+
+  <script>
+    const form = document.getElementById('transaction-form');
+    const balanceDisplay = document.getElementById('balance');
+    const transactionsContainer = document.getElementById('transactions');
+
+    let balance = 0;
+    const transactions = [];
+
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+
+      const amount = parseFloat(document.getElementById('amount').value);
+      const description = document.getElementById('description').value;
+      const category = document.getElementById('category').value;
+
+      const transaction = { amount, description, category, id: Date.now() };
+
+      transactions.push(transaction);
+
+      if (category === 'income') {
+        balance += amount;
+      } else if (category === 'expense') {
+        balance -= amount;
+      }
+
+      updateUI();
+
+      form.reset();
+    });
+
+    function deleteTransaction(id) {
+      const index = transactions.findIndex(transaction => transaction.id === id);
+
+      if (index !== -1) {
+        const transaction = transactions[index];
+
+        if (transaction.category === 'income') {
+          balance -= transaction.amount;
+        } else if (transaction.category === 'expense') {
+          balance += transaction.amount;
+        }
+
+        transactions.splice(index, 1);
+
+        updateUI();
+      }
+    }
+
+    function updateUI() {
+      balanceDisplay.textContent = balance.toFixed(2);
+
+      transactionsContainer.innerHTML = '';
+
+      transactions.forEach(transaction => {
+        const transactionDiv = document.createElement('div');
+        transactionDiv.className = 'transaction';
+
+        transactionDiv.innerHTML = `
+          <span>${transaction.description} ($${transaction.amount.toFixed(2)})</span>
+          <button onclick="deleteTransaction(${transaction.id})">Delete</button>
+        `;
+
+        transactionsContainer.appendChild(transactionDiv);
+      });
+    }
+  </script>
+</body>
+</html>
